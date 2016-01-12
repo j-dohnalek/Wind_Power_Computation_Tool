@@ -159,7 +159,10 @@ class study:
     
     
     def execute(self):
-    
+    	"""
+    	Execute the simulation and display the result on graph
+    	"""
+    	
         # VARIABLES
         x, y = [], []
         var = self._params[0]  # starting value
@@ -167,7 +170,8 @@ class study:
         plt.ylabel('Power output (Watts)')
         
         df = self._data
-
+	
+	# Select the study variable
         while var < self._params[1]: # _params[3] = end
                     
             if self._type   == 'w':
