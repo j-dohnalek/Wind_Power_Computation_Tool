@@ -115,8 +115,6 @@ class TurbineBlade:
         return math.pi * math.pow(self.radius, 2)
 
 
-    def lift
-
 """
 Wind power efficiency
 
@@ -216,6 +214,7 @@ class MathematicalModel(TurbineBlade, Generator, GearBox):
             self.speed = float(s * 0.277777777777778)
 
         elif unit == 'mps':
+            # meters per second
             self.speed = float(s)
 
         else:
