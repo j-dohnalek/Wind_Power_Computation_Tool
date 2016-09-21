@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 import simulation
-import argparse
 
 """
 Marine turbines are designed using the same
