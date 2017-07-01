@@ -1,5 +1,5 @@
 """
-Python Wind Computation tool 
+Python Wind Computation tool
 Copyright (C) 2017  Jiri Dohnalek
 
 This program is free software; you can redistribute it and/or modify
@@ -57,18 +57,18 @@ def dewpoint_temperature(t,rh):
     :param t  :temperature in celsius
     :param rh :relative humidity in %
     :return float: dewpoint temperature in celsius
-    """ 
+    """
     return math.pow(( rh /100.0), 1.0/8.0 )*(112.0+0.9 * t)+ 0.1*t-112.0
 
 
 def saturation_vapor_pressure(t):
     """
     :param t : dewpoint temperature
-    p = (c0+T*(c1+T*(c2+T*(c3+T*(c4+T*(c5+T*(c6+T*(c7+T*(c8+T*(c9)))))))))) 
+    p = (c0+T*(c1+T*(c2+T*(c3+T*(c4+T*(c5+T*(c6+T*(c7+T*(c8+T*(c9))))))))))
     Es = eso * p^8
     :return saturation vapor pressure in pascal
     """
-    
+
     p = (C0+t*(C1+t*(C2+t*(C3+t*(C4+t*(C5+t*(C6+t*(C7+t*(C8+t*(C9))))))))))
     return ESO / math.pow(p, 8) * 100
 

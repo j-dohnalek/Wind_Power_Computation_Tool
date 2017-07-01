@@ -1,5 +1,5 @@
 """
-Python Wind Computation tool 
+Python Wind Computation tool
 Copyright (C) 2017  Jiri Dohnalek
 
 This program is free software; you can redistribute it and/or modify
@@ -37,28 +37,26 @@ def turbine_power(v, r, alt, t, rh, cp, d=None):
     :param t  : temperature in celsius
     :param rh : relative humidity in %
     :param cp : coefficient of power 0.35-0.45
-    :param d  : density of fluid 
+    :param d  : density of fluid
     """
     a = swept_area(r)
-    
+
     # Manual entry for the fluid density
     if d is None:
         _d = meteo.fluid_density(alt, t, rh)
     else:
         _d = d
-        
-    return (1.0/2.0)* _d * a * math.pow(v, 3) * cp
 
+    return (1.0 / 2.0) * _d * a * math.pow(v, 3) * cp
 
-"""
-Generators:
-50% for car alternator
-80% or possibly more for a permanent magnet generator
-or grid-connected induction generator
-"""
-    
 
 class Generator:
+    """
+    Generators:
+    50% for car alternator
+    80% or possibly more for a permanent magnet generator
+    or grid-connected induction generator
+    """
 
     generator_efficiency = None  # efficiency of gearbox
 
@@ -74,13 +72,11 @@ class Generator:
         self.generator_efficiency = efficiency
 
 
-"""
-Gear ratios:
-You may want to attach a gear system to your generator.
-"""
-
-
 class GearBox:
+    """
+    Gear ratios:
+    You may want to attach a gear system to your generator.
+    """
 
     gearbox_efficiency = None  # efficiency of gearbox
 
@@ -95,25 +91,21 @@ class GearBox:
         self.gearbox_efficiency = efficiency
 
 
-"""
-Turbine Blade:
-without blades, your turbine would not produce any electricity.
-Some factors to consider:
-
-Size, Shape, Number, Pitch ,Weight ,Material
-
-Wing lift = 
-
-"""
-
-
 class TurbineBlade:
+    """
+    Turbine Blade:
+    without blades, your turbine would not produce any electricity.
+    Some factors to consider:
 
+    Size, Shape, Number, Pitch ,Weight ,Material
+
+    Wing lift =
+
+    """
     radius = None  # length of blade in meters
 
     def __init__(self):
         pass
-
 
     def blade_length(self, radius, unit='m'):
         """
@@ -126,31 +118,35 @@ class TurbineBlade:
         elif unit == 'ft':
             self.radius = float(radius * 0.3048)
 
-
     def swept_area(self):
         """
         :return turbine swept area
         """
         return math.pi * math.pow(self.radius, 2)
 
-
-"""
-Wind power efficiency
-
-P = 0.5 x rho x A x Cp x V3(cubed) x Ng x Nb
-
-P = power in watts (746 watts = 1 hp) (1,000 watts = 1 kilowatt)
-rho = air density (about 1.225 kg/m3 at sea level, less higher up)
-A = rotor swept area, exposed to the wind (m2)
-Cp = Coefficient of performance (0.59 Betz limit is the maximum theoretically possible, .35 for a good design)
-V = wind speed in meters/sec
-Ng = generator efficiency - 50% for car alternator, 80% or possibly more for a permanent magnet generator or
-grid-connected induction generator
-Nb = gearbox/bearings efficiency (depends, could be as high as 95% if good)
-"""
+    def lift(self):
+        pass
 
 
 class MathematicalModel(TurbineBlade, Generator, GearBox):
+    """
+    Wind power efficiency
+
+    P = 0.5 x rho x A x Cp x V3(cubed) x Ng x Nb
+
+    P = power in watts (746 watts = 1 hp) (1,000 watts = 1 kilowatt)
+    rho = air density (about 1.225 kg/m3 at sea level, less higher up)
+    A = rotor swept area, exposed to the wind (m2)
+    Cp = Coefficient of performance
+        - 0.59 Betz limit is the maximum theoretically possible,
+        - 0.35 for a good design
+    V = wind speed in meters/sec
+    Ng = generator efficiency
+        - 50% for car alternator,
+        - 80% or possibly more for a permanent magnet generator or
+        grid-connected induction generator
+    Nb = gearbox/bearings efficiency (depends, could be as high as 95% if good)
+    """
 
     humidity = None
     temperature = None
@@ -186,46 +182,52 @@ class MathematicalModel(TurbineBlade, Generator, GearBox):
 
         # p = power
         if v == 'p':
-            return (1.0/2.0)* d * a * v**3 * c * g * b
+            return (1.0 / 2.0) * d * a * v ** 3 * c * g * b
 
         # c = power coefficient
         elif var == 'c':
             if a != 0 and d != 0 and b != 0 and g != 0 and v != 0:
-                return (2 * p) / (a * d * b * g * v**3)
+                return (2 * p) / (a * d * b * g * v ** 3)
             else:
-                raise ZeroDivisionError("Power coefficient calculation error, a b d g v!=0")
+                err = "Power coefficient calculation error, a b d g v!=0"
+                raise ZeroDivisionError(err)
 
         # s = wind speed
         elif var == 's':
             if a != 0 and d != 0 and b != 0 and g != 0 and c != 0:
-                return (2.0**(1.0/3) * p**(1.0/3))/(a**(1.0/3) * b**(1.0/3) * c**(1.0/3) * d**(1.0/3) * g**(1.0/3))
+                x1 = 2.0 ** (1.0 / 3) * p ** (1.0 / 3)
+                x2 = a ** (1.0 / 3) * b ** (1.0 / 3)
+                x3 = c ** (1.0 / 3) * d ** (1.0 / 3) * g ** (1.0 / 3)
+                return x1 / (x2 * x3)
             else:
-                raise ZeroDivisionError("Wind speed calculation error,  a b c d g!=0")
+                err = "Wind speed calculation error,  a b c d g!=0"
+                raise ZeroDivisionError(err)
         # d = fluid density
         elif var == 'd':
             if a != 0 and b != 0 and c != 0 and g != 0 and v != 0:
-                return (2 * p)/(a * b * c * g * v**3)
+                return (2 * p) / (a * b * c * g * v ** 3)
             else:
-                raise ZeroDivisionError("Fluid density calculation error, a b c g v!=0")
+                err = "Fluid density calculation error, a b c g v!=0"
+                raise ZeroDivisionError(err)
 
         # l = blade length
         elif var == 'l':
 
             if b != 0 and c != 0 and d != 0 and g != 0 and v != 0:
-                a = (2 * p)/(b * c * d * g * v**3)
-                return (a**(1.0/2))/(math.pi**(1.0/2))
-
+                a = (2 * p) / (b * c * d * g * v ** 3)
+                return (a ** (1.0 / 2)) / (math.pi ** (1.0 / 2))
             else:
-                raise ZeroDivisionError("Blade length calculation error, b c d g v!=0")
+                err = "Blade length calculation error, b c d g v!=0"
+                raise ZeroDivisionError(err)
 
     def wind_speed(self, s, unit='mps'):
         """
         :param s: wind speed
         :param unit: SI Unit
         """
-        
+
         if unit == 'mph':
-            # 1 mile/hour = 0.44704 meters/second 
+            # 1 mile/hour = 0.44704 meters/second
             self.speed = float(s * 0.44704)
 
         elif unit == 'kmph' or unit == 'kph':
@@ -233,11 +235,11 @@ class MathematicalModel(TurbineBlade, Generator, GearBox):
             self.speed = float(s * 0.277777777777778)
 
         elif unit == 'mps':
-            # meters per second
             self.speed = float(s)
 
         else:
-            raise TypeError("Unsuported speed unit! Supported units are 'mph', 'mps', 'kph'")
+            err = "Unsuported unit! Supported units are 'mph', 'mps', 'kph'"
+            raise TypeError(err)
 
     def altitude_above_sea(self, alt, unit='m'):
         """
@@ -246,12 +248,13 @@ class MathematicalModel(TurbineBlade, Generator, GearBox):
         """
         if unit == 'm':
             self.altitude = float(alt)
-        
+
         elif unit == 'ft':
             self.altitude = alt * 0.3048
 
         else:
-            raise TypeError("Unsupported altitude unit! Supported units are 'm' or 'ft'.")
+            err = "Unsupported altitude unit! Supported units are 'm' or 'ft'."
+            raise TypeError(err)
 
     def ambient_temperature(self, t, unit):
         """
@@ -263,7 +266,8 @@ class MathematicalModel(TurbineBlade, Generator, GearBox):
         elif unit == 'C':
             self.temperature = float(t)
         else:
-            raise TypeError("Unsupported temperature unit! Supported units are F or C.")
+            err = "Unsupported temperature unit! Supported units are F or C."
+            raise TypeError(err)
 
     def relative_humidity(self, rh):
         """
@@ -290,21 +294,16 @@ class MathematicalModel(TurbineBlade, Generator, GearBox):
         self.power = pwr
 
 
-"""
-Wind Turbine:
--------------
-
-1) Blades
-2) Generator
-3) Gear Box
-
-"""
-
-
 class Turbine(MathematicalModel):
+    """
+    Wind Turbine:
+    -------------
 
+    1) Blades
+    2) Generator
+    3) Gear Box
+
+    """
     def __init__(self):
 
         pass
-
-
